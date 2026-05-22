@@ -6,76 +6,63 @@
       :isFocused="isFocused"
       :appliedOptions="appliedOptions"
     >
-      <Select
-        :id="control.id + '-input'"
-        :class="styles.control.input"
-        :disabled="!control.enabled"
-        :readonly="control.readonly"
-        :autofocus="appliedOptions.focus"
-        :placeholder="appliedOptions.placeholder"
-        :label="computedLabel"
-        :hint="control.description"
-        :required="control.required"
-        :model-value="control.data"
-        :options="items"
-        :editable="true"
-        :maxlength="
-          appliedOptions.restrict ? control.schema.maxLength : undefined
-        "
-        v-bind="primeVueProps('Select')"
-        @update:model-value="onChange"
-        @focus="handleFocus"
-        @blur="handleBlur"
-      />
+      <div :class="styles.control.root + '-inner'">
+        <label v-if="computedLabel" :for="control.id + '-input'" class="primevue-control-label">
+          {{ computedLabel }}
+          <span v-if="control.required" class="primevue-control-required">*</span>
+        </label>
+        <Chips
+          :id="control.id + '-input'"
+          :class="[styles.control.input, { 'p-invalid': control.errors }]"
+          :disabled="!control.enabled"
+          :placeholder="appliedOptions.placeholder || 'Add tags...'"
+          :model-value="control.data || []"
+          :separator="','"
+          v-bind="primeVueProps('Chips')"
+          @update:model-value="onChange"
+          @focus="handleFocus"
+          @blur="handleBlur"
+        />
+        <small v-if="control.errors" class="primevue-control-error">{{ control.errors }}</small>
+        <small v-else-if="control.description && persistentHint()" class="primevue-control-hint">{{ control.description }}</small>
+      </div>
     </control-wrapper>
   </Fluid>
 </template>
 
 <script lang="ts">
-import { type ControlElement, type JsonSchema } from '@jsonforms/core';
+import { type ControlElement } from '@jsonforms/core';
 import {
   rendererProps,
   useJsonFormsControl,
   type RendererProps,
 } from '@jsonforms/vue';
 import { defineComponent } from 'vue';
-import Select from 'primevue/select';
+import Chips from 'primevue/chips';
 import Fluid from 'primevue/fluid';
-import { determineClearValue, usePrimeVueControl } from '../util';
+import { usePrimeVueControl } from '../util';
 import { default as ControlWrapper } from './ControlWrapper.vue';
 
 const controlRenderer = defineComponent({
-  name: 'anyof-string-or-enum-control-renderer',
+  name: 'chips-control-renderer',
   components: {
     ControlWrapper,
-    Select,
+    Chips,
     Fluid,
   },
   props: {
     ...rendererProps<ControlElement>(),
   },
   setup(props: RendererProps<ControlElement>) {
-    const clearValue = determineClearValue('');
     return usePrimeVueControl(
       useJsonFormsControl(props),
-      (value) => value || clearValue,
+      (value) => (Array.isArray(value) ? value.map((v) => String(v).trim()).filter((v) => v.length > 0) : []),
+      300,
     );
-  },
-  computed: {
-    items(): string[] {
-      // made sure via the testers
-      return findEnumSchema(this.control.schema.anyOf!)!.enum!;
-    },
   },
 });
 
 export default controlRenderer;
-
-const findEnumSchema = (schemas: JsonSchema[]) =>
-  schemas.find(
-    (s) =>
-      s.enum !== undefined && (s.type === 'string' || s.type === undefined),
-  );
 </script>
 
 <style scoped>
@@ -85,7 +72,7 @@ const findEnumSchema = (schemas: JsonSchema[]) =>
   gap: var(--p-spacing-1, 0.25rem);
 }
 
-.control-inner .p-select {
+.control-inner :deep(.p-chips) {
   width: 100%;
 }
 

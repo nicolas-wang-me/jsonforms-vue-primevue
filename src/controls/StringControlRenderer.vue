@@ -11,7 +11,7 @@
           {{ computedLabel }}
           <span v-if="control.required" class="primevue-control-required">*</span>
         </label>
-        <Dropdown
+        <Select
           v-if="suggestions !== undefined"
           v-disabled-icon-focus
           :id="control.id + '-input'"
@@ -24,7 +24,7 @@
           :show-clear="clearable"
           option-label="label"
           option-value="value"
-          v-bind="primeVueProps('Dropdown')"
+          v-bind="primeVueProps('Select')"
           @update:model-value="onChange"
           @focus="handleFocus"
           @blur="handleBlur"
@@ -64,7 +64,7 @@ import every from 'lodash/every';
 import isArray from 'lodash/isArray';
 import isString from 'lodash/isString';
 import { defineComponent } from 'vue';
-import Dropdown from 'primevue/dropdown';
+import Select from 'primevue/select';
 import InputText from 'primevue/inputtext';
 import Fluid from 'primevue/fluid';
 import { usePrimeVueControl, determineClearValue } from '../util';
@@ -76,7 +76,7 @@ const controlRenderer = defineComponent({
   components: {
     ControlWrapper,
     InputText,
-    Dropdown,
+    Select,
     Fluid,
   },
   directives: {

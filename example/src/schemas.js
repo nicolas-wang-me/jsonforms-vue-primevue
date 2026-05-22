@@ -155,3 +155,66 @@ export const personData = {
     { name: 'Hiking', skillLevel: 'Intermediate' },
   ],
 };
+
+/**
+ * Example Tags Schema with Chips Control
+ *
+ * Shows:
+ * - Array of strings rendered as editable Chips
+ * - Comma and Enter key to add tags
+ * - Backspace to remove tags
+ * - Whitespace trimming
+ */
+
+export const tagsSchema = {
+  type: 'object',
+  properties: {
+    title: {
+      type: 'string',
+      title: 'Title',
+      description: 'A title for your collection',
+    },
+    tags: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      title: 'Tags',
+      description: 'Add tags separated by comma or press Enter',
+    },
+    keywords: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      title: 'Keywords',
+      minItems: 1,
+      maxItems: 5,
+      description: 'Add up to 5 keywords',
+    },
+  },
+};
+
+export const tagsUischema = {
+  type: 'VerticalLayout',
+  elements: [
+    {
+      type: 'Control',
+      scope: '#/properties/title',
+    },
+    {
+      type: 'Control',
+      scope: '#/properties/tags',
+    },
+    {
+      type: 'Control',
+      scope: '#/properties/keywords',
+    },
+  ],
+};
+
+export const tagsData = {
+  title: 'My Awesome Project',
+  tags: ['vue', 'forms', 'primevue'],
+  keywords: ['json-schema', 'ui-generation'],
+};

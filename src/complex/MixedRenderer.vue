@@ -3,7 +3,7 @@
     <template v-if="valueType === 'array' || valueType === 'object'">
       <div class="mb-2">
         <div class="flex align-items-center gap-2 mb-2">
-          <Dropdown
+          <Select
             v-if="mixedRenderInfos"
             :id="control.id + '-input-selector'"
             :disabled="!control.enabled"
@@ -15,7 +15,7 @@
             optionLabel="label"
             optionValue="index"
             @update:model-value="handleSelectChange"
-            v-bind="primeVueProps('Dropdown')"
+            v-bind="primeVueProps('Select')"
             @focus="handleFocus"
             @blur="handleBlur"
           />
@@ -35,7 +35,7 @@
       </div>
     </template>
     <template v-else>
-      <Dropdown
+      <Select
         class="select"
         v-if="mixedRenderInfos"
         :id="control.id + '-input-selector'"
@@ -48,7 +48,7 @@
         optionLabel="label"
         optionValue="index"
         @update:model-value="handleSelectChange"
-        v-bind="primeVueProps('Dropdown')"
+        v-bind="primeVueProps('Select')"
         @focus="handleFocus"
         @blur="handleBlur"
       />
@@ -85,7 +85,7 @@ import {
   type RendererProps,
 } from '@jsonforms/vue';
 import { computed, defineComponent, provide, ref, watch } from 'vue';
-import Dropdown from 'primevue/dropdown';
+import Select from 'primevue/select';
 import {
   IsDynamicPropertyContext,
   isControlEditable,
@@ -306,7 +306,7 @@ const controlRenderer = defineComponent({
   name: 'mixed-renderer',
   components: {
     DispatchRenderer,
-    Dropdown,
+    Select,
   },
   props: {
     ...rendererProps<ControlElement>(),

@@ -7,7 +7,7 @@
       :rootSchema="control.rootSchema"
     />
 
-    <Dropdown
+    <Select
       v-disabled-icon-focus
       :id="control.id + '-input'"
       :class="styles.control.input"
@@ -21,7 +21,7 @@
       option-value="index"
       :model-value="selectedIndex"
       :show-clear="clearable"
-      v-bind="primeVueProps('Dropdown')"
+      v-bind="primeVueProps('Select')"
       @update:model-value="handleSelectChange"
       @focus="handleFocus"
       @blur="handleBlur"
@@ -63,7 +63,7 @@ import {
 import { defineComponent, ref } from 'vue';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
-import Dropdown from 'primevue/dropdown';
+import Select from 'primevue/select';
 import { DisabledIconFocus } from '../controls/directives';
 import {
   useCombinatorTranslations,
@@ -78,7 +78,7 @@ const controlRenderer = defineComponent({
     CombinatorProperties,
     Dialog,
     Button,
-    Dropdown,
+    Select,
   },
   directives: {
     DisabledIconFocus,

@@ -5,7 +5,7 @@
     :isFocused="isFocused"
     :appliedOptions="appliedOptions"
   >
-    <Dropdown
+    <Select
       v-if="appliedOptions.autocomplete === false"
       v-disabled-icon-focus
       :id="control.id + '-input'"
@@ -19,7 +19,7 @@
       option-label="label"
       option-value="value"
       :show-clear="control.enabled"
-      v-bind="primeVueProps('Dropdown')"
+      v-bind="primeVueProps('Select')"
       @update:model-value="onChange"
       @focus="handleFocus"
       @blur="handleBlur"
@@ -54,7 +54,7 @@ import {
   type RendererProps,
 } from '@jsonforms/vue';
 import { defineComponent, ref, computed } from 'vue';
-import Dropdown from 'primevue/dropdown';
+import Select from 'primevue/select';
 import AutoComplete from 'primevue/autocomplete';
 import { default as ControlWrapper } from '../controls/ControlWrapper.vue';
 import { DisabledIconFocus } from '../controls/directives';
@@ -64,7 +64,7 @@ const controlRenderer = defineComponent({
   name: 'autocomplete-oneof-enum-control-renderer',
   components: {
     ControlWrapper,
-    Dropdown,
+    Select,
     AutoComplete,
   },
   directives: {

@@ -1,6 +1,6 @@
 {
   "name": "@chaoqing/jsonforms-vue-primevue",
-  "version": "3.8.5",
+  "version": "3.8.6",
   "description": "Vue PrimeVue v4 renderers for JSON Forms — community-maintained fork of @jsonforms/vue-vuetify for the PrimeVue ecosystem",
   "repository": {
     "type": "git",

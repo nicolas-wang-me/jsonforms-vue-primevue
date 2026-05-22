@@ -76,6 +76,7 @@ export default layoutRenderer;
 
 .horizontal-layout-item {
   display: flex;
+  flex: 1;
   flex-direction: column;
   min-width: 0;
 }

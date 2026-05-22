@@ -11,7 +11,7 @@
           {{ computedLabel }}
           <span v-if="control.required" class="primevue-control-required">*</span>
         </label>
-        <Dropdown
+        <Select
           v-disabled-icon-focus
           :id="control.id + '-input'"
           :class="[styles.control.input, { 'p-invalid': control.errors }]"
@@ -24,7 +24,7 @@
           option-label="label"
           option-value="value"
           :show-clear="clearable"
-          v-bind="primeVueProps('Dropdown')"
+          v-bind="primeVueProps('Select')"
           @update:model-value="onChange"
           @focus="handleFocus"
           @blur="handleBlur"
@@ -44,7 +44,7 @@ import {
   type RendererProps,
 } from '@jsonforms/vue';
 import { defineComponent } from 'vue';
-import Dropdown from 'primevue/dropdown';
+import Select from 'primevue/select';
 import Fluid from 'primevue/fluid';
 import { determineClearValue, usePrimeVueControl } from '../util';
 import { default as ControlWrapper } from './ControlWrapper.vue';
@@ -54,7 +54,7 @@ const controlRenderer = defineComponent({
   name: 'oneof-enum-control-renderer',
   components: {
     ControlWrapper,
-    Dropdown,
+    Select,
     Fluid,
   },
   directives: {
@@ -81,7 +81,7 @@ export default controlRenderer;
   gap: var(--p-spacing-1, 0.25rem);
 }
 
-.control-inner .p-dropdown {
+.control-inner .p-select {
   width: 100%;
 }
 

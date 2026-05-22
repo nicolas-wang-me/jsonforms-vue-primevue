@@ -11,7 +11,7 @@
           {{ computedLabel }}
           <span v-if="control.required" class="primevue-control-required">*</span>
         </label>
-        <Calendar
+        <DatePicker
           v-disabled-icon-focus
           :id="control.id + '-input'"
           :class="[styles.control.input, { 'p-invalid': control.errors }]"
@@ -22,8 +22,8 @@
           :model-value="pickerValue"
           :date-format="dateFormat"
           :hour-format="hourFormat"
-          v-bind="primeVueProps('Calendar')"
-          @update:model-value="onChange"
+          v-bind="primeVueProps('DatePicker')"
+          @update:model-value="onPickerChange"
           @focus="handleFocus"
           @blur="handleBlur"
         />
@@ -42,17 +42,18 @@ import {
   type RendererProps,
 } from '@jsonforms/vue';
 import { defineComponent } from 'vue';
-import Calendar from 'primevue/calendar';
+import DatePicker from 'primevue/datepicker';
 import Fluid from 'primevue/fluid';
 import { usePrimeVueControl, determineClearValue, parseDateTime } from '../util';
 import { default as ControlWrapper } from './ControlWrapper.vue';
 import { DisabledIconFocus } from './directives';
+import dayjs from 'dayjs';
 
 const controlRenderer = defineComponent({
   name: 'datetime-control-renderer',
   components: {
     ControlWrapper,
-    Calendar,
+    DatePicker,
     Fluid,
   },
   directives: {
@@ -114,6 +115,15 @@ const controlRenderer = defineComponent({
     },
   },
   methods: {
+   onPickerChange(value: Date | Date[] | (Date | null)[] | null | undefined): void {
+      // Convert Date object from DatePicker to ISO string format for validation
+      if (value instanceof Date) {
+        const formattedValue = dayjs(value).format(this.dateTimeSaveFormat);
+        this.onChange(formattedValue);
+      } else {
+        this.onChange(value);
+      }
+    },
     /**
      * Extract the date portion from a dayjs datetime format string.
      * Time tokens (H, h, m, s, a, A, Z) and their adjacent separators
@@ -192,7 +202,7 @@ export default controlRenderer;
   gap: var(--p-spacing-1, 0.25rem);
 }
 
-.control-inner .p-calendar {
+.control-inner .p-datepicker {
   width: 100%;
 }
 

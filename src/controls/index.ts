@@ -4,6 +4,7 @@ export * from './directives';
 export { default as ControlWrapper } from './ControlWrapper.vue';
 export { default as AnyOfStringOrEnumControlRenderer } from './AnyOfStringOrEnumControlRenderer.vue';
 export { default as BooleanControlRenderer } from './BooleanControlRenderer.vue';
+export { default as ChipsControlRenderer } from './ChipsControlRenderer.vue';
 export { default as BooleanToggleControlRenderer } from './BooleanToggleControlRenderer.vue';
 export { default as DateControlRenderer } from './DateControlRenderer.vue';
 export { default as DateTimeControlRenderer } from './DateTimeControlRenderer.vue';
@@ -23,6 +24,7 @@ export { default as TimeControlRenderer } from './TimeControlRenderer.vue';
 import { entry as anyOfStringOrEnumControlRendererEntry } from './AnyOfStringOrEnumControlRenderer.entry';
 import { entry as booleanControlRendererEntry } from './BooleanControlRenderer.entry';
 import { entry as booleanToggleControlRendererEntry } from './BooleanToggleControlRenderer.entry';
+import { entry as chipsControlRendererEntry } from './ChipsControlRenderer.entry';
 import { entry as dateControlRendererEntry } from './DateControlRenderer.entry';
 import { entry as dateTimeControlRendererEntry } from './DateTimeControlRenderer.entry';
 import { entry as enumControlRendererEntry } from './EnumControlRenderer.entry';
@@ -42,6 +44,7 @@ export const controlRenderers = [
   anyOfStringOrEnumControlRendererEntry,
   booleanControlRendererEntry,
   booleanToggleControlRendererEntry,
+  chipsControlRendererEntry,
   dateControlRendererEntry,
   dateTimeControlRendererEntry,
   enumControlRendererEntry,
@@ -58,4 +61,4 @@ export const controlRenderers = [
   timeControlRendererEntry,
 ];
 
-export { anyOfStringOrEnumControlRendererEntry, booleanControlRendererEntry, booleanToggleControlRendererEntry, dateControlRendererEntry, dateTimeControlRendererEntry, enumControlRendererEntry, integerControlRendererEntry, multiStringControlRendererEntry, numberControlRendererEntry, oneOfEnumControlRendererEntry, oneOfRadioGroupControlRendererEntry, passwordControlRendererEntry, radioGroupControlRendererEntry, sliderControlRendererEntry, stringControlRendererEntry, stringMaskControlRendererEntry, timeControlRendererEntry };
+export { anyOfStringOrEnumControlRendererEntry, booleanControlRendererEntry, booleanToggleControlRendererEntry, chipsControlRendererEntry, dateControlRendererEntry, dateTimeControlRendererEntry, enumControlRendererEntry, integerControlRendererEntry, multiStringControlRendererEntry, numberControlRendererEntry, oneOfEnumControlRendererEntry, oneOfRadioGroupControlRendererEntry, passwordControlRendererEntry, radioGroupControlRendererEntry, sliderControlRendererEntry, stringControlRendererEntry, stringMaskControlRendererEntry, timeControlRendererEntry };

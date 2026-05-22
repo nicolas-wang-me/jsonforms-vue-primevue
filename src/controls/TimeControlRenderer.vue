@@ -11,7 +11,7 @@
           {{ computedLabel }}
           <span v-if="control.required" class="primevue-control-required">*</span>
         </label>
-        <Calendar
+        <DatePicker
           v-disabled-icon-focus
           :id="control.id + '-input'"
           :class="[styles.control.input, { 'p-invalid': control.errors }]"
@@ -22,7 +22,7 @@
           :time-only="true"
           :hour-format="hourFormat"
           :show-seconds="useSeconds"
-          v-bind="primeVueProps('Calendar')"
+          v-bind="primeVueProps('DatePicker')"
           @update:model-value="onPickerChange"
           @focus="handleFocus"
           @blur="handleBlur"
@@ -42,7 +42,7 @@ import {
   type RendererProps,
 } from '@jsonforms/vue';
 import { computed, defineComponent } from 'vue';
-import Calendar from 'primevue/calendar';
+import DatePicker from 'primevue/datepicker';
 import Fluid from 'primevue/fluid';
 import { determineClearValue, parseDateTime, usePrimeVueControl } from '../util';
 import { default as ControlWrapper } from './ControlWrapper.vue';
@@ -59,7 +59,7 @@ const controlRenderer = defineComponent({
   name: 'time-control-renderer',
   components: {
     ControlWrapper,
-    Calendar,
+    DatePicker,
     Fluid,
   },
   directives: {
@@ -104,8 +104,8 @@ const controlRenderer = defineComponent({
     },
   },
   methods: {
-    onPickerChange(value: Date | null): void {
-      const time = parseDateTime(value, undefined);
+    onPickerChange(value: Date | Date[] | (Date | null)[] | null | undefined): void {
+      const time = parseDateTime(value as Date | null, undefined);
       const newdata: string | null = time
         ? time.format(this.timeSaveFormat)
         : null;
@@ -124,7 +124,7 @@ export default controlRenderer;
   gap: var(--p-spacing-1, 0.25rem);
 }
 
-.control-inner .p-calendar {
+.control-inner .p-datepicker {
   width: 100%;
 }
 
