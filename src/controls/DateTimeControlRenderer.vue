@@ -23,7 +23,7 @@
           :date-format="dateFormat"
           :hour-format="hourFormat"
           v-bind="primeVueProps('Calendar')"
-          @update:model-value="onChange"
+          @update:model-value="onPickerChange"
           @focus="handleFocus"
           @blur="handleBlur"
         />
@@ -114,6 +114,35 @@ const controlRenderer = defineComponent({
     },
   },
   methods: {
+    onPickerChange(value: Date | null): void {
+      // Determine options
+      const utc = this.appliedOptions?.utc === true;
+      const storageFormat = this.appliedOptions?.storageFormat;
+      const time = parseDateTime(value, undefined);
+
+      let newdata: string | null = null;
+      if (time) {
+        if (utc) {
+          // when utc is enabled, default storage is ISO string with Z
+          if (!storageFormat || storageFormat === 'iso') {
+            // Use native Date.toISOString to ensure full ISO with Z
+            newdata = time.toDate().toISOString();
+          } else {
+            // Use dayjs UTC formatting with provided storageFormat
+            // Note: storageFormat should include timezone tokens if required
+            newdata = time.utc().format(storageFormat);
+          }
+        } else {
+          // legacy behavior: format using dateTimeSaveFormat
+          newdata = time.format(this.dateTimeSaveFormat);
+        }
+      } else {
+        newdata = null;
+      }
+
+      this.onChange(newdata);
+    },
+
     /**
      * Extract the date portion from a dayjs datetime format string.
      * Time tokens (H, h, m, s, a, A, Z) and their adjacent separators
