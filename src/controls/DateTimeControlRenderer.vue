@@ -115,15 +115,37 @@ const controlRenderer = defineComponent({
     },
   },
   methods: {
-   onPickerChange(value: Date | Date[] | (Date | null)[] | null | undefined): void {
-      // Convert Date object from DatePicker to ISO string format for validation
-      if (value instanceof Date) {
-        const formattedValue = dayjs(value).format(this.dateTimeSaveFormat);
-        this.onChange(formattedValue);
+    onPickerChange(value: Date | Date[] | (Date | null)[] | null | undefined): void {
+      // Normalize value to a single Date if DatePicker returns arrays
+      let picked: Date | null = null;
+      if (Array.isArray(value)) {
+        picked = value.length ? (value[0] as Date) : null;
+      } else if (value instanceof Date) {
+        picked = value;
       } else {
-        this.onChange(value);
+        picked = null;
       }
-    },
+
+      const utc = this.appliedOptions?.utc === true;
+      const storageFormat = this.appliedOptions?.storageFormat;
+
+      if (picked) {
+        const time = dayjs(picked);
+        let newdata: string | null = null;
+        if (utc) {
+          if (!storageFormat || storageFormat === 'iso') {
+            newdata = picked.toISOString();
+          } else {
+            newdata = time.utc().format(storageFormat);
+          }
+        } else {
+          newdata = time.format(this.dateTimeSaveFormat);
+        }
+        this.onChange(newdata);
+      } else {
+        this.onChange(null);
+      }
+    }, 
     /**
      * Extract the date portion from a dayjs datetime format string.
      * Time tokens (H, h, m, s, a, A, Z) and their adjacent separators
