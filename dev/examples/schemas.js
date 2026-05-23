@@ -247,7 +247,17 @@ export const remoteSelectSchema = {
 export const remoteSelectCombinedUischema = {
   type: 'VerticalLayout',
   elements: [
+    // Intro label
+    {
+      type: 'Label',
+      text: 'Async Remote Select examples: each entry below demonstrates a different configuration. Try typing sample search characters shown before each example.'
+    },
+
     // 1) Default: template string using placeholders
+    {
+      type: 'Label',
+      text: '1) Template string — example searches: "Al", "First", "P-1"'
+    },
     {
       type: 'Control',
       scope: '#/properties/productId',
@@ -286,6 +296,10 @@ export const remoteSelectCombinedUischema = {
 
     // 2) Template as function (custom rendering for suggestions)
     {
+      type: 'Label',
+      text: '2) Template function — example searches: "Be", "Second"'
+    },
+    {
       type: 'Control',
       scope: '#/properties/productId',
       options: {
@@ -321,6 +335,10 @@ export const remoteSelectCombinedUischema = {
 
     // 3) Custom extractValue function (store composite value)
     {
+      type: 'Label',
+      text: '3) Custom extract — example searches: "Al", "Gamma" (stores composite object)'
+    },
+    {
       type: 'Control',
       scope: '#/properties/productId',
       options: {
@@ -347,6 +365,10 @@ export const remoteSelectCombinedUischema = {
     },
 
     // 4) hitsToChoices function to shape suggestion items (complex labels/meta)
+    {
+      type: 'Label',
+      text: '4) hitsToChoices — example searches: "A-10", "B-20" (shows complex labels and meta)'
+    },
     {
       type: 'Control',
       scope: '#/properties/productId',
@@ -386,6 +408,10 @@ export const remoteSelectCombinedUischema = {
 
     // 5) Display function: use a custom displayFn to show a different final label after selection
     {
+      type: 'Label',
+      text: '5) displayFn — example searches: "Xray", "Yankee" (custom final display)'
+    },
+    {
       type: 'Control',
       scope: '#/properties/productId',
       options: {
@@ -407,6 +433,10 @@ export const remoteSelectCombinedUischema = {
 
     // 6) Nested value extraction: extract nested id from meta
     {
+      type: 'Label',
+      text: '6) Nested extract — example searches: "ExtOne", "ExtTwo" (stores nested externalId)'
+    },
+    {
       type: 'Control',
       scope: '#/properties/productId',
       options: {
@@ -427,6 +457,10 @@ export const remoteSelectCombinedUischema = {
     },
 
     // 7) Paginated response example: searchFn returns a wrapper { total, items }
+    {
+      type: 'Label',
+      text: '7) Paginated response — example searches: "P-1", "P-2" (server returns wrapper with items)'
+    },
     {
       type: 'Control',
       scope: '#/properties/productId',
