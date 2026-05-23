@@ -1,66 +1,66 @@
 Plan: Async searchable Select control for JSON Forms (PrimeVue)
 
-Problem
-- Provide an enhanced Select control for jsonforms-vue-primevue that queries a backend as the user types, shows hits as selectable choices, and stores a derived value from the chosen hit into JSON Forms state.
+Summary (what was implemented and what remains)
+- Implemented a reusable async Autocomplete flow and example usage. Key features now available:
+  - useAsyncAutocomplete composable: searchFn/url support, responsePath, debounce, minLength, loading/error, hitsToChoices mapping, extractValue, format/display helpers, and fetchByValue (remoteGet) to resolve labels for existing stored values.
+  - Autocomplete renderers updated to honor uischema.options.remoteSelect and to fetch/display labels for initial values.
+  - showDropdown option: when true the AutoComplete dropdown icon is visible and clicking it sends an empty query to fetch initial choices.
+  - createFastCrudRemote helper: generates searchFn and remoteGet for FastCRUD/FastAPI endpoints given base URL and field names.
+- Remaining: add unit/integration tests, expand README docs with FastCRUD snippets, and add a dedicated example demonstrating remoteGet with a real HTTP backend.
 
-Backend (FastAPI / FastCRUD) specifics & defaults (user feedback)
-- Backend: default generator is FastAPI/FastCRUD. Responses may be either a raw list of records or a paginated wrapper (e.g., { total: N, items: [...] } or { data: [...] }). Support both via configurable responsePath or a custom searchFn.
-- Typical record example: { id: 0, name: '1st', message: 'the first one' }.
-- Display options after choosing a hit:
-  - Consumer can specify a single field key to display (e.g., labelField: "name") OR
-  - Provide a function to map the record to the displayed string (e.g., hit => `${hit.name}: ${hit.message}`).
-- Stored value options after selection:
-  - Consumer may specify a valueField (e.g., "id") OR
-  - Provide an extractValue function to map the record to any type (string, number, object).
+Backend (FastAPI / FastCRUD) specifics & defaults
+- Support raw arrays or wrapper responses (items/data/total) via responsePath or custom searchFn. Typical record: { id: 0, name: '1st', message: 'the first one' }.
+- Default mappings: labelField (default 'name'), descriptionField (default 'message'), valueField (default 'id'). Use hitsToChoices/extractValue for custom shapes.
+- Added remoteGet support: remoteSelect.remoteGet(value) || GET {baseUrl}/{value} used to fetch a single hit so the Autocomplete can display its label when JSON Forms already contains a stored value.
 
-High-level approach
-- Reuse and extend existing Autocomplete renderers (src/extended/AutocompleteEnumControlRenderer.vue and AutocompleteOneOfEnumControlRenderer.vue).
-- Extract common async logic into a composable (useAsyncAutocomplete) that handles: calling searchFn or fetch URL, following responsePath, debounce, minLength, loading/error state, optional caching, and mapping via hitsToChoices.
-- Expose configuration via UI schema under options.remoteSelect (opt-in). Support both simple key-based options and function overrides:
-  {
+UI schema: options.remoteSelect (supported keys)
+- url: string (optional fallback if searchFn not provided)
+- queryParam / searchField: string (defaults to 'q')
+- responsePath: string ('items'|'data'...) to extract list from wrapper
+- labelField / descriptionField / valueField
+- searchFn(q): Promise (override)
+- remoteGet(value): Promise (resolve single hit; override)
+- hitsToChoices(hits): map hits -> {label,value,meta}
+- extractValue(hit): maps hit -> stored value
+- template or displayFn for label formatting
+- debounce, minLength
+- showDropdown: boolean — show dropdown icon and send empty query when clicked
+
+Files added/modified (implemented)
+- src/composables/useAsyncAutocomplete.ts (new)
+- src/extended/AutocompleteEnumControlRenderer.vue (updated)
+- src/extended/AutocompleteOneOfEnumControlRenderer.vue (updated)
+- src/extended/*entry.ts testers updated to match hasOption('remoteSelect')
+- src/util/fastcrud.ts createFastCrudRemote helper
+- dev/examples/schemas.js combined remoteSelect examples with Labels/descriptions
+
+Example usage (uischema snippet)
+{
+  "type": "Control",
+  "scope": "#/properties/productId",
+  "options": {
     "remoteSelect": {
-      "url": "https://api/...",            // optional, used if searchFn not provided
-      "queryParam": "q",                  // default q
-      "responsePath": "items|data|",     // optional path to array inside response
-      "labelField": "name",               // optional shorthand for hitsToChoices mapping
-      "descriptionField": "message",     // optional to show secondary text
-      "valueField": "id",                 // optional shorthand for extractValue
-      "searchFn": (q)=>Promise,            // optional override
-      "hitsToChoices": (hits)=>[],         // optional override
-      "extractValue": (hit)=>hit.id,       // optional override
-      "debounce": 300,
-      "minLength": 2,
-      "template": "{name}: {message}"     // optional template string for item display
+      "url": "https://api.example.com/products",
+      "searchField": "name",
+      "labelField": "name",
+      "valueField": "id",
+      "showDropdown": true
     }
   }
-- Provide sensible defaults so users can pass only url + valueField/labelField or rely on default assumptions (id,name,message). For more complex needs allow full function overrides.
+}
 
-Files to change / inspect
-- src/extended/AutocompleteEnumControlRenderer.vue
-- src/extended/AutocompleteOneOfEnumControlRenderer.vue
-- src/extended/index.ts (registering new renderer if extracted)
-- src/composables/useAsyncAutocomplete.ts (new composable)
-- src/controls/ControlWrapper.vue (for uniform loading/error UI)
-- README.md and example usage in docs block (include FastAPI examples)
-- @example package: add a simulated async example demonstrating the full flow (query -> remote results -> mapping -> selection)
+FastCRUD helper
+- createFastCrudRemote({ baseUrl, searchField, labelField, valueField, responsePath }) returns { searchFn, remoteGet, labelField, valueField, responsePath } ready to plug into remoteSelect options.
 
-Implementation tasks (todos)
-- implement-async-select: Create AsyncSelect renderer (single-select) + useAsyncAutocomplete composable; support UI schema remoteSelect options, responsePath, labelField/valueField shorthands and function overrides.
-- defaults-and-composables: Implement default HTTP fetcher that understands typical FastAPI wrappers, defaultHitsToChoices (supports labelField/descriptionField/template) and defaultExtractValue (supports valueField or function).
-- ui-schema-props: Document UI schema keys and examples in README and add example usage in dev app (show url+field keys, custom function use, and FastAPI wrapper handling).
-- tests: Add unit tests for mapping functions and composable behavior; add integration tests mocking FastAPI-style responses.
-- examples: Add an example page in the example/dev app demonstrating FastAPI default flow and a custom-function flow.
-- example-simulated-async: Add a simulated async example inside @example package that uses an async function to mimic backend queries (use setTimeout/Promise) and demonstrates labelField/valueField and custom function overrides.
+Developer tasks / next steps
+- Docs: update README with full examples (FastCRUD, remoteGet, hitsToChoices, extractValue, showDropdown). Add a short how-to for remoteGet to resolve initial values.
+- Tests: unit tests for defaultHitsToChoices, extractValue, fetchByValue, and composable behavior (mock HTTP responses). Integration test for example UI.
+- UX: consider showing spinner/placeholder when remoteGet fails and add configurable error text in appliedOptions.
 
-Important decisions & trade-offs
-- PrimeVue component: AutoComplete remains recommended — supports templating and async queries.
-- Storage: default stores id when valueField is provided; consumer can override to any type via extractValue.
-- Flexibility: Support both simple key-based configs (for users of FastCRUD) and advanced function-based configs.
+Verification
+- Type-check passed. To exercise manually: npm install && npm run dev — open the example app and use "Async Remote Select (combined)". Click the dropdown (if showDropdown:true) to fetch initial choices, and prefill the data with a known value to test remoteGet resolving label.
 
-Developer notes
-- Export helpers: defaultHitsToChoices(hits, {labelField, descriptionField, template}) and defaultExtractValue(hit, valueField) for consumers to reuse.
-- README: include code snippets showing:
-  - Minimal FastAPI use: { url: '...', labelField: 'name', valueField: 'id' }
-  - Custom functions: { searchFn: async q => fetch(...), hitsToChoices: h=>..., extractValue: h=>... }
-- @example: provide a ready-to-run simulated async example that developers can copy/paste when integrating with real backend.
-
+Notes
+- API is opt-in via uischema.options.remoteSelect; non-remote enum behavior is unchanged.
+- All features support both function-based overrides (searchFn, hitsToChoices, extractValue, remoteGet) and key-based simple configs (url, labelField, valueField).
+- Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
