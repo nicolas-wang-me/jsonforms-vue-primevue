@@ -53,7 +53,8 @@ import {
   useJsonFormsEnumControl,
   type RendererProps,
 } from '@jsonforms/vue';
-import { computed, defineComponent, ref } from 'vue';
+import { computed, defineComponent, ref, watch } from 'vue';
+import useAsyncAutocomplete from '../composables/useAsyncAutocomplete';
 import Select from 'primevue/select';
 import AutoComplete from 'primevue/autocomplete';
 import { determineClearValue, usePrimeVueControl } from '../util';
@@ -92,14 +93,52 @@ const controlRenderer = defineComponent({
         : [];
     });
 
-    const selectedLabel = computed(() => {
+    const selectedLabel = ref('');
+    const filteredOptions = ref<Option[]>([]);
+
+    const remote = (control.appliedOptions as any).value?.remoteSelect;
+
+    if (remote) {
+      const { suggestions, onComplete } = useAsyncAutocomplete(remote);
+      watch(suggestions, (v) => {
+        filteredOptions.value = v as any;
+      }, { immediate: true });
+
+      const searchOptions = (event: any) => {
+        onComplete(event.query);
+      };
+
+      const onAutoCompleteChange = (value: any) => {
+        if (typeof value === 'string') {
+          const found = (filteredOptions.value || []).find((opt: any) => opt.label === value);
+          control.onChange(found ? found.value : null);
+          selectedLabel.value = value;
+        } else if (value && typeof value === 'object') {
+          control.onChange(value.value ?? null);
+          selectedLabel.value = value.label ?? '';
+        } else {
+          control.onChange(null);
+          selectedLabel.value = '';
+        }
+      };
+
+      return {
+        ...control,
+        enumOptions,
+        selectedLabel,
+        filteredOptions,
+        searchOptions,
+        onAutoCompleteChange,
+      };
+    }
+
+    // fallback local enum behavior
+    const selectedLabelComputed = computed(() => {
       const data = control.control.value.data;
       if (data === undefined || data === null) return '';
       const found = enumOptions.value.find((opt) => opt.value === data);
       return found ? found.label : '';
     });
-
-    const filteredOptions = ref<Option[]>([]);
 
     const searchOptions = (event: any) => {
       const query = event.query.toLowerCase();
@@ -124,7 +163,7 @@ const controlRenderer = defineComponent({
     return {
       ...control,
       enumOptions,
-      selectedLabel,
+      selectedLabel: selectedLabelComputed,
       filteredOptions,
       searchOptions,
       onAutoCompleteChange,

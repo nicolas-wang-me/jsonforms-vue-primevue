@@ -53,7 +53,8 @@ import {
   useJsonFormsOneOfEnumControl,
   type RendererProps,
 } from '@jsonforms/vue';
-import { defineComponent, ref, computed } from 'vue';
+import { defineComponent, ref, computed, watch } from 'vue';
+import useAsyncAutocomplete from '../composables/useAsyncAutocomplete';
 import Select from 'primevue/select';
 import AutoComplete from 'primevue/autocomplete';
 import { default as ControlWrapper } from '../controls/ControlWrapper.vue';
@@ -76,30 +77,50 @@ const controlRenderer = defineComponent({
   setup(props: RendererProps<ControlElement>) {
     const clearValue = determineClearValue('');
     const input = useJsonFormsOneOfEnumControl(props);
+    const control = usePrimeVueControl(
+      input,
+      (value) => (value === null ? clearValue : value),
+      300,
+    );
+
     const searchTerm = ref('');
-    
-    const filteredOptions = computed(() => {
+
+    const remote = (control.appliedOptions as any).value?.remoteSelect;
+
+    const filteredOptions = ref<any[]>([]);
+
+    if (remote) {
+      const { suggestions, onComplete } = useAsyncAutocomplete(remote);
+      watch(suggestions, (v) => (filteredOptions.value = v as any), { immediate: true });
+
+      const onAutocomplete = (event: any) => {
+        onComplete(event.query);
+      };
+
+      return {
+        ...control,
+        filteredOptions,
+        onAutocomplete,
+      };
+    }
+
+    // fallback local behavior
+    const filtered = computed(() => {
       const options = input.control.value?.options || [];
       if (!searchTerm.value) {
         return options;
       }
       const term = searchTerm.value.toLowerCase();
-      return options.filter((opt: any) =>
-        opt.label.toLowerCase().includes(term)
-      );
+      return options.filter((opt: any) => opt.label.toLowerCase().includes(term));
     });
-    
+
     const onAutocomplete = (event: any) => {
       searchTerm.value = event.query;
     };
-    
+
     return {
-      ...usePrimeVueControl(
-        input,
-        (value) => (value === null ? clearValue : value),
-        300,
-      ),
-      filteredOptions,
+      ...control,
+      filteredOptions: filtered,
       onAutocomplete,
     };
   },

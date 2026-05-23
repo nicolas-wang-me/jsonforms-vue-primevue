@@ -231,6 +231,273 @@ export const tagsData = {
  * - uischema: UI Schema
  * - data: Initial data (optional)
  */
+
+// Example: Remote Async Select (simulated)
+export const remoteSelectSchema = {
+  type: 'object',
+  properties: {
+    productId: {
+      type: ['integer', 'null'],
+      title: 'Product (async select)',
+    },
+  },
+};
+
+// 1) Default: template string using placeholders
+export const remoteSelectUischema = {
+  type: 'VerticalLayout',
+  elements: [
+    {
+      type: 'Control',
+      scope: '#/properties/productId',
+      options: {
+        remoteSelect: {
+          searchFn: async (q) => {
+            const hits = [
+              { id: 1, name: 'Alpha', message: 'First item' },
+              { id: 2, name: 'Beta', message: 'Second item' },
+              { id: 3, name: 'Gamma', message: 'Third item' },
+              { id: 4, name: 'Delta', message: 'Fourth item' },
+            ];
+            const lower = (q || '').toLowerCase();
+            return new Promise((resolve) =>
+              setTimeout(() => {
+                if (!lower) return resolve(hits.slice(0, 5));
+                resolve(
+                  hits.filter(
+                    (h) =>
+                      String(h.name).toLowerCase().includes(lower) ||
+                      String(h.message).toLowerCase().includes(lower)
+                  )
+                );
+              }, 350)
+            );
+          },
+          labelField: 'name',
+          descriptionField: 'message',
+          valueField: 'id',
+          debounce: 300,
+          minLength: 1,
+          template: '{name}: {message}',
+        },
+      },
+    },
+  ],
+};
+
+// 2) Template as function (custom rendering for suggestions)
+export const remoteSelectTemplateFunctionUischema = {
+  type: 'VerticalLayout',
+  elements: [
+    {
+      type: 'Control',
+      scope: '#/properties/productId',
+      options: {
+        remoteSelect: {
+          // same simulated searchFn as above
+          searchFn: async (q) => {
+            const hits = [
+              { id: 1, name: 'Alpha', message: 'First item' },
+              { id: 2, name: 'Beta', message: 'Second item' },
+              { id: 3, name: 'Gamma', message: 'Third item' },
+              { id: 4, name: 'Delta', message: 'Fourth item' },
+            ];
+            const lower = (q || '').toLowerCase();
+            return new Promise((resolve) =>
+              setTimeout(() => {
+                if (!lower) return resolve(hits.slice(0, 5));
+                resolve(
+                  hits.filter(
+                    (h) =>
+                      String(h.name).toLowerCase().includes(lower) ||
+                      String(h.message).toLowerCase().includes(lower)
+                  )
+                );
+              }, 350)
+            );
+          },
+          // function template returns the suggestion string
+          template: (hit) => `${hit.name} — ${hit.message}`,
+          labelField: 'name',
+          valueField: 'id',
+          debounce: 200,
+        },
+      },
+    },
+  ],
+};
+
+// 3) Custom extractValue function (store composite value)
+export const remoteSelectCustomExtractUischema = {
+  type: 'VerticalLayout',
+  elements: [
+    {
+      type: 'Control',
+      scope: '#/properties/productId',
+      options: {
+        remoteSelect: {
+          searchFn: async (q) => {
+            const hits = [
+              { id: 1, name: 'Alpha', message: 'First item' },
+              { id: 2, name: 'Beta', message: 'Second item' },
+              { id: 3, name: 'Gamma', message: 'Third item' },
+            ];
+            const lower = (q || '').toLowerCase();
+            return new Promise((resolve) =>
+              setTimeout(() => {
+                if (!lower) return resolve(hits);
+                resolve(hits.filter((h) => String(h.name).toLowerCase().includes(lower)));
+              }, 250)
+            );
+          },
+          // label shown after selection (UI shows labelField)
+          labelField: 'name',
+          // store a composite object instead of primitive id
+          extractValue: (hit) => ({ productId: hit.id, productName: hit.name }),
+          template: '{name} — {message}',
+        },
+      },
+    },
+  ],
+};
+
+// 4) hitsToChoices function to shape suggestion items (complex labels/meta)
+export const remoteSelectHitsToChoicesUischema = {
+  type: 'VerticalLayout',
+  elements: [
+    {
+      type: 'Control',
+      scope: '#/properties/productId',
+      options: {
+        remoteSelect: {
+          searchFn: async (q) => {
+            const hits = [
+              { id: 10, sku: 'A-10', name: 'Alpha', message: 'First item' },
+              { id: 20, sku: 'B-20', name: 'Beta', message: 'Second item' },
+              { id: 30, sku: 'C-30', name: 'Gamma', message: 'Third item' },
+            ];
+            const lower = (q || '').toLowerCase();
+            return new Promise((resolve) =>
+              setTimeout(() => {
+                resolve(
+                  hits.filter(
+                    (h) =>
+                      h.name.toLowerCase().includes(lower) ||
+                      h.sku.toLowerCase().includes(lower)
+                  )
+                );
+              }, 200)
+            );
+          },
+          // convert raw hits into custom choice objects: label, value, meta
+          hitsToChoices: (hits) =>
+            hits.map((h) => ({
+              label: `${h.name} (${h.sku}) — ${h.message}`,
+              value: h.id,
+              meta: { sku: h.sku, raw: h },
+            })),
+          // labelField still used for display after selection (if not using custom displayFn)
+          labelField: 'name',
+          valueField: 'id',
+          debounce: 150,
+        },
+      },
+    },
+  ],
+};
+
+// 5) Display function: use a custom displayFn to show a different final label after selection
+export const remoteSelectDisplayFnUischema = {
+  type: 'VerticalLayout',
+  elements: [
+    {
+      type: 'Control',
+      scope: '#/properties/productId',
+      options: {
+        remoteSelect: {
+          searchFn: async (q) => {
+            const hits = [
+              { id: 101, sku: 'X-101', name: 'Xray', message: 'Special' },
+              { id: 102, sku: 'Y-102', name: 'Yankee', message: 'Special 2' },
+            ];
+            const lower = (q || '').toLowerCase();
+            return new Promise((resolve) =>
+              setTimeout(() => resolve(hits.filter((h) => h.name.toLowerCase().includes(lower))), 120)
+            );
+          },
+          // template for suggestions
+          template: (hit) => `${hit.name} — ${hit.sku} (${hit.message})`,
+          // after selection, use displayFn to show final label in input instead of labelField
+          displayFn: (hit) => `${hit.name} (${hit.sku})`,
+          valueField: 'id',
+        },
+      },
+    },
+  ],
+};
+
+// 6) Nested value extraction: extract nested id from meta
+export const remoteSelectNestedValueUischema = {
+  type: 'VerticalLayout',
+  elements: [
+    {
+      type: 'Control',
+      scope: '#/properties/productId',
+      options: {
+        remoteSelect: {
+          searchFn: async (q) => {
+            const hits = [
+              { meta: { externalId: 'ext-1' }, name: 'ExtOne' },
+              { meta: { externalId: 'ext-2' }, name: 'ExtTwo' },
+            ];
+            const lower = (q || '').toLowerCase();
+            return new Promise((resolve) =>
+              setTimeout(() => resolve(hits.filter((h) => h.name.toLowerCase().includes(lower))), 180)
+            );
+          },
+          labelField: 'name',
+          // nested extractValue
+          extractValue: (hit) => hit.meta && hit.meta.externalId,
+          template: '{name} ({meta.externalId})',
+        },
+      },
+    },
+  ],
+};
+
+// 7) Paginated response example: searchFn returns a wrapper { total, items }
+export const remoteSelectPaginatedUischema = {
+  type: 'VerticalLayout',
+  elements: [
+    {
+      type: 'Control',
+      scope: '#/properties/productId',
+      options: {
+        remoteSelect: {
+          searchFn: async (q) => {
+            const all = Array.from({ length: 30 }, (_, i) => ({ id: i + 1, name: `P-${i + 1}`, message: `Item ${i + 1}` }));
+            const lower = (q || '').toLowerCase();
+            const filtered = all.filter((h) => h.name.toLowerCase().includes(lower));
+            // simulate server-side pagination wrapper
+            return new Promise((resolve) =>
+              setTimeout(() => resolve({ total: filtered.length, items: filtered.slice(0, 10) }), 220)
+            );
+          },
+          // inform composable to extract items at responsePath
+          responsePath: 'items',
+          labelField: 'name',
+          valueField: 'id',
+          template: '{name}: {message}',
+        },
+      },
+    },
+  ],
+};
+
+export const remoteSelectData = {
+  productId: null,
+};
+
 export const customExamples = {
   person: {
     name: 'person',
@@ -245,5 +512,54 @@ export const customExamples = {
     schema: tagsSchema,
     uischema: tagsUischema,
     data: tagsData,
+  },
+  remoteSelect: {
+    name: 'remoteSelect',
+    label: 'Async Remote Select (template string)',
+    schema: remoteSelectSchema,
+    uischema: remoteSelectUischema,
+    data: remoteSelectData,
+  },
+  remoteSelectTemplateFunction: {
+    name: 'remoteSelectTemplateFunction',
+    label: 'Async Remote Select (template function)',
+    schema: remoteSelectSchema,
+    uischema: remoteSelectTemplateFunctionUischema,
+    data: remoteSelectData,
+  },
+  remoteSelectCustomExtract: {
+    name: 'remoteSelectCustomExtract',
+    label: 'Async Remote Select (custom extract)',
+    schema: remoteSelectSchema,
+    uischema: remoteSelectCustomExtractUischema,
+    data: remoteSelectData,
+  },
+  remoteSelectHitsToChoices: {
+    name: 'remoteSelectHitsToChoices',
+    label: 'Async Remote Select (hitsToChoices)',
+    schema: remoteSelectSchema,
+    uischema: remoteSelectHitsToChoicesUischema,
+    data: remoteSelectData,
+  },
+  remoteSelectDisplayFn: {
+    name: 'remoteSelectDisplayFn',
+    label: 'Async Remote Select (displayFn)',
+    schema: remoteSelectSchema,
+    uischema: remoteSelectDisplayFnUischema,
+    data: remoteSelectData,
+  },
+  remoteSelectNestedValue: {
+    name: 'remoteSelectNestedValue',
+    label: 'Async Remote Select (nested extract)',
+    schema: remoteSelectSchema,
+    uischema: remoteSelectNestedValueUischema,
+    data: remoteSelectData,
+  },
+  remoteSelectPaginated: {
+    name: 'remoteSelectPaginated',
+    label: 'Async Remote Select (paginated response)',
+    schema: remoteSelectSchema,
+    uischema: remoteSelectPaginatedUischema,
+    data: remoteSelectData,
   },
 };
