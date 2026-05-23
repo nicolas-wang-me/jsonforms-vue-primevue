@@ -90,8 +90,22 @@ const controlRenderer = defineComponent({
     const filteredOptions = ref<any[]>([]);
 
     if (remote) {
-      const { suggestions, onComplete } = useAsyncAutocomplete(remote);
+      const { suggestions, onComplete, fetchByValue } = useAsyncAutocomplete(remote);
       watch(suggestions, (v) => (filteredOptions.value = v as any), { immediate: true });
+
+      // ensure existing value is fetched and shown
+      watch(
+        () => control.control.value.data,
+        async (val) => {
+          if (val === undefined || val === null) return;
+          const mapped = await fetchByValue(val);
+          if (mapped) {
+            const exists = (filteredOptions.value || []).some((o: any) => o.value === mapped.value);
+            if (!exists) filteredOptions.value = [mapped, ...(filteredOptions.value || [])];
+          }
+        },
+        { immediate: true },
+      );
 
       const onAutocomplete = (event: any) => {
         onComplete(event.query);

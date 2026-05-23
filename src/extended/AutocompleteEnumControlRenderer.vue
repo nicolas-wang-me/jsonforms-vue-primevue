@@ -99,10 +99,29 @@ const controlRenderer = defineComponent({
     const remote = (control.appliedOptions as any).value?.remoteSelect;
 
     if (remote) {
-      const { suggestions, onComplete } = useAsyncAutocomplete(remote);
+      const { suggestions, onComplete, fetchByValue } = useAsyncAutocomplete(remote);
       watch(suggestions, (v) => {
         filteredOptions.value = v as any;
       }, { immediate: true });
+
+      // if control already has a value, fetch its label and ensure it's present in suggestions so AutoComplete can display it
+      watch(
+        () => control.control.value.data,
+        async (val) => {
+          if (val === undefined || val === null) {
+            selectedLabel.value = '';
+            return;
+          }
+          const mapped = await fetchByValue(val);
+          if (mapped) {
+            // add if missing
+            const exists = (filteredOptions.value || []).some((o: any) => o.value === mapped.value);
+            if (!exists) filteredOptions.value = [mapped, ...(filteredOptions.value || [])];
+            selectedLabel.value = mapped.label || String(val);
+          }
+        },
+        { immediate: true },
+      );
 
       const searchOptions = (event: any) => {
         onComplete(event.query);

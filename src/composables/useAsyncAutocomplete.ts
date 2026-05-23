@@ -86,6 +86,33 @@ export default function useAsyncAutocomplete(options: RemoteOptions) {
     }
   };
 
+  const fetchByValue = async (value: any) => {
+    // Try remoteGet fn, then try GET /url/{value}
+    try {
+      let res: any;
+      if ((options as any).remoteGet && typeof (options as any).remoteGet === 'function') {
+        res = await (options as any).remoteGet(value);
+      } else if (options.url) {
+        // attempt direct fetch by id
+        const resp = await fetch(`${options.url.replace(/\/$/, '')}/${encodeURIComponent(String(value))}`);
+        res = await resp.json();
+      } else {
+        return null;
+      }
+
+      // if response is an array, pick first
+      const hit = Array.isArray(res) ? res[0] : res;
+      if (!hit) return null;
+
+      const mapped = options.hitsToChoices ? options.hitsToChoices([hit])[0] : defaultHitsToChoices([hit], options)[0];
+      return mapped;
+    } catch (e) {
+      // swallow
+      return null;
+    }
+  };
+
+
   const debouncedFetch = debounce(async (q?: string) => {
     if (!q || q.length < minLength) {
       // if empty and minLength > 0, clear suggestions
@@ -130,5 +157,7 @@ export default function useAsyncAutocomplete(options: RemoteOptions) {
     error: computed(() => error.value),
     onComplete,
     formatLabelFor,
+    fetchByValue,
   };
 }
+
