@@ -36,12 +36,13 @@
       :suggestions="filteredOptions"
       option-label="label"
       option-value="value"
-      :dropdown="true"
+      :dropdown="showDropdown"
       v-bind="primeVueProps('AutoComplete')"
       @update:model-value="onChange"
       @focus="handleFocus"
       @blur="handleBlur"
       @complete="onAutocomplete"
+      @dropdown="onDropdown"
     />
   </control-wrapper>
 </template>
@@ -89,6 +90,10 @@ const controlRenderer = defineComponent({
 
     const filteredOptions = ref<any[]>([]);
 
+    // defaults for dropdown handlers (returned in both branches)
+    let onDropdown = () => {};
+    let showDropdown = false;
+
     if (remote) {
       const { suggestions, onComplete, fetchByValue } = useAsyncAutocomplete(remote);
       watch(suggestions, (v) => (filteredOptions.value = v as any), { immediate: true });
@@ -111,10 +116,19 @@ const controlRenderer = defineComponent({
         onComplete(event.query);
       };
 
+      onDropdown = () => {
+        // trigger empty query to fetch initial suggestions
+        onComplete('');
+      };
+
+      showDropdown = !!(remote && (remote as any).showDropdown === true);
+
       return {
         ...control,
         filteredOptions,
         onAutocomplete,
+        onDropdown,
+        showDropdown,
       };
     }
 
@@ -136,6 +150,8 @@ const controlRenderer = defineComponent({
       ...control,
       filteredOptions: filtered,
       onAutocomplete,
+      onDropdown,
+      showDropdown,
     };
   },
 });
